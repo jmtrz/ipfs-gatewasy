@@ -1,7 +1,7 @@
 
 # Define variables
 variable "resource_group_name" {
-  default = "IPFS-RG"
+  default = "personal-sandbox"
 }
 
 variable "location" {
@@ -28,12 +28,12 @@ variable "dns_name_label" {
 
 variable "existing_registry_name" {
   type = string
-  default = "hqipfsacr"
+  default = "personalacr"
 }
 
 variable "existing_resource_group_name" {
   type = string
-  default = "IPFS-RG"
+  default = "personal-sandobx"
 }
 
 variable "use_existing_rg" {
