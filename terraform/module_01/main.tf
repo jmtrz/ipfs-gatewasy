@@ -12,7 +12,7 @@ resource "azurerm_resource_group" "hq-ipfs-rg" {
 # End resource_group
 
 # Create the storage account
-resource "azurerm_storage_account" "hq-ipfs-storage" {
+resource "azurerm_storage_account" "hq-ipfs-azure-storage" {
   name                     = var.storage_account_name
   resource_group_name      = local.azurerm_rg_name
   location                 = local.azurerm_rg_location
@@ -23,8 +23,9 @@ resource "azurerm_storage_account" "hq-ipfs-storage" {
 # Create the file share
 resource "azurerm_storage_share" "hq-ipfs-storage-share" {
   name                 = var.share_name
-  storage_account_name = azurerm_storage_account.hq-ipfs-storage.name
+  storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
   quota                = 50 # GB
+  depends_on           = [azurerm_storage_account.hq-ipfs-azure-storage]
 }
 
 # End azure_storage
@@ -71,42 +72,9 @@ resource "azurerm_container_group" "hq-ipfs-aci" {
       read_only  = false
       share_name = azurerm_storage_share.hq-ipfs-storage-share.name
 
-      storage_account_name = azurerm_storage_account.hq-ipfs-storage.name
-      storage_account_key  = azurerm_storage_account.hq-ipfs-storage.primary_access_key
+      storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
+      storage_account_key  = azurerm_storage_account.hq-ipfs-azure-storage.primary_access_key
     }
-
-    # commands = [
-    #     "/bin/sh",
-    #     "-c",
-    #     <<EOT
-    #       ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://hqipfs.southeastasia.azurecontainer.io:5001", "http://127.0.0.1:5001", "https://webui.ipfs.io"]';
-    #       ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]';
-    #       ipfs daemon --migrate >> /data/ipfs/config-output.log 2>&1;
-    #     EOT
-    # ]
-
-    # commands = [
-    #   "/bin/sh",
-    #   "-c",
-    #   <<EOT
-    #     if [ ! -f /data/ipfs/config ]; then
-    #       ipfs init;
-    #     fi;
-
-    #     ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001;
-    #     ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080;
-
-    #     ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]';
-    #     ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST", "OPTIONS"]';
-    #     ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '["X-Requested-With", "Range", "User-Agent"]';
-
-    #     ipfs config --json Gateway.HTTPHeaders.Access-Control-Allow-Origin '["*"]';
-    #     ipfs config --json Gateway.HTTPHeaders.Access-Control-Allow-Methods '["GET", "OPTIONS"]';
-    #     ipfs config --json Gateway.HTTPHeaders.Access-Control-Allow-Headers '["X-Requested-With", "Range", "User-Agent"]';
-
-    #     ipfs daemon --migrate;
-    #   EOT
-    # ]
   }
 }
 # End container_instance

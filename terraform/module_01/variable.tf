@@ -1,7 +1,7 @@
 
 # Define variables
 variable "resource_group_name" {
-  default = "personal-sandbox"
+  default = "IPFS-RG"
 }
 
 variable "location" {
@@ -9,7 +9,7 @@ variable "location" {
 }
 
 variable "storage_account_name" {
-  default = "hqipfsstorage"
+  default = "hqipfsazstorage"
 }
 
 variable "share_name" {
@@ -21,25 +21,23 @@ variable "container_name" {
 }
 
 variable "dns_name_label" {
-  default = "hqipfs"
+  default = "hqipfs-gateway"
 }
 
-
-
 variable "existing_registry_name" {
-  type = string
-  default = "personalacr"
+  type    = string
+  default = "hqipfsacr"
 }
 
 variable "existing_resource_group_name" {
-  type = string
-  default = "personal-sandobx"
+  type    = string
+  default = "IPFS-RG"
 }
 
 variable "use_existing_rg" {
   description = "enable to use existing resource group"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 #-----------------------------

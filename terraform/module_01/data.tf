@@ -5,6 +5,15 @@ data "azurerm_container_registry" "acr" {
 }
 
 data "azurerm_resource_group" "existing" {
-  count = var.use_existing_rg ? 1 : 0  
+  count = var.use_existing_rg ? 1 : 0
   name  = var.existing_resource_group_name
+}
+
+data "azurerm_container_group" "ipfs" {
+  name                = var.container_name
+  resource_group_name = local.azurerm_rg_name
+}
+
+locals {
+  public_ip = data.azurerm_container_group.ipfs.ip_address
 }
