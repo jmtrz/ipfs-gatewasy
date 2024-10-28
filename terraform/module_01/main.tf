@@ -20,6 +20,19 @@ resource "azurerm_storage_account" "hq-ipfs-azure-storage" {
   account_replication_type = "LRS"
 }
 
+# Additional storage shares for Caddy
+resource "azurerm_storage_share" "caddy-storage-share" {
+  name                 = "caddy-data"
+  storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
+  quota                = 50
+}
+
+resource "azurerm_storage_share" "caddy-config-share" {
+  name                 = "caddy-config"
+  storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
+  quota                = 50
+}
+
 # Create the file share
 resource "azurerm_storage_share" "hq-ipfs-storage-share" {
   name                 = var.share_name
@@ -75,6 +88,66 @@ resource "azurerm_container_group" "hq-ipfs-aci" {
       storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
       storage_account_key  = azurerm_storage_account.hq-ipfs-azure-storage.primary_access_key
     }
+  }
+   # Caddy Container
+  container {
+    name   = "caddy"
+    image  = "${data.azurerm_container_registry.acr.login_server}/caddy:latest"
+    cpu    = "0.2"
+    memory = "0.5"
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+    ports {
+      port     = 443
+      protocol = "TCP"
+    }
+
+    volume {
+      name       = "caddy-data"
+      mount_path = "/data"
+      read_only  = false
+      share_name = azurerm_storage_share.caddy-storage-share.name
+
+      storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
+      storage_account_key  = azurerm_storage_account.hq-ipfs-azure-storage.primary_access_key
+    }
+
+    volume {
+      name       = "caddy-config"
+      mount_path = "/config"
+      read_only  = false
+      share_name = azurerm_storage_share.caddy-config-share.name
+
+      storage_account_name = azurerm_storage_account.hq-ipfs-azure-storage.name
+      storage_account_key  = azurerm_storage_account.hq-ipfs-azure-storage.primary_access_key
+    }
+
+    commands = [
+      "caddy", 
+      "reverse-proxy", 
+      "--from",
+      "${var.dns_name_label}.${var.location}.azurecontainer.io", 
+      "--to", 
+      "http://${var.dns_name_label}.${var.location}.azurecontainer.io:5001"
+    ]
+
+    environment_variables = {
+      "DOMAIN"      = "${var.dns_name_label}.${var.location}.azurecontainer.io"
+      "EMAIL"       = var.admin_email  # Add this variable to your variables.tf
+    }
+
+    # commands = [
+    #   "caddy",
+    #   "reverse-proxy",
+    #   "--from",
+    #   "${var.dns_name_label}.${var.location}.azurecontainer.io",
+    #   "--to",
+    #   "localhost:8080",  # IPFS Gateway
+    #   "--internal-certs" # For testing. Remove for production
+    # ]
   }
 }
 # End container_instance

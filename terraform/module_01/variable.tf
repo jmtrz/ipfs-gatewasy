@@ -40,6 +40,11 @@ variable "use_existing_rg" {
   default     = true
 }
 
+variable "admin_email" {
+  description = "value"
+  default = "jamester@homeqube.com"
+}
+
 #-----------------------------
 # Azure Registry Image
 #-----------------------------
