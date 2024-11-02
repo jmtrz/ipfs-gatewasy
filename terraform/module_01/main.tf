@@ -70,6 +70,7 @@ resource "azurerm_container_group" "hq-ipfs-aci" {
       port     = 4001
       protocol = "TCP"
     }
+
     ports {
       port     = 5001
       protocol = "TCP"
