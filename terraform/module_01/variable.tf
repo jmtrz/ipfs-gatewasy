@@ -40,6 +40,12 @@ variable "use_existing_rg" {
   default     = true
 }
 
+variable "use_existing_acg" {
+  description = "enable users to use existing container group"
+  type = bool
+  default = false
+}
+
 variable "admin_email" {
   description = "value"
   default = "jamester@homeqube.com"

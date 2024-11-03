@@ -1,5 +1,5 @@
 resource "null_resource" "configure_ipfs" {
-  depends_on = [azurerm_container_group.hq-ipfs-aci]
+  depends_on = [azurerm_container_group.hq_ipfs_aci]
 
   # Wait for container to be ready
   provisioner "local-exec" {

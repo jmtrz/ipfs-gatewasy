@@ -44,7 +44,7 @@ resource "azurerm_storage_share" "hq-ipfs-storage-share" {
 # End azure_storage
 
 # Start create_container
-resource "azurerm_container_group" "hq-ipfs-aci" {
+resource "azurerm_container_group" "hq_ipfs_aci" {
   name                = var.container_name
   resource_group_name = local.azurerm_rg_name
   location            = local.azurerm_rg_location

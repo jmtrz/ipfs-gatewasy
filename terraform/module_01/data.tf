@@ -10,10 +10,11 @@ data "azurerm_resource_group" "existing" {
 }
 
 data "azurerm_container_group" "ipfs" {
+  count = var.use_existing_acg ? 1 : 0
   name                = var.container_name
   resource_group_name = local.azurerm_rg_name
 }
 
 locals {
-  public_ip = data.azurerm_container_group.ipfs.ip_address
+  public_ip = var.use_existing_acg ? data.azurerm_container_group.ipfs[0].ip_address : azurerm_container_group.hq_ipfs_aci.ip_address
 }
