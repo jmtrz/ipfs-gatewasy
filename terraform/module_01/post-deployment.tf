@@ -1,5 +1,5 @@
 resource "null_resource" "configure_ipfs" {
-  depends_on = [azurerm_container_group.hq_ipfs_aci]
+  depends_on = [azurerm_container_group.hq_ipfs_gateway_acg]
 
   # Wait for container to be ready
   provisioner "local-exec" {
@@ -54,7 +54,7 @@ resource "null_resource" "configure_ipfs" {
           --resource-group ${local.azurerm_rg_name} `
           --name ${var.container_name} `
           --container-name ipfs `
-          --exec-command 'ipfs config Reprovider.Interval --json "\"12h\""'
+          --exec-command 'ipfs config Reprovider.Interval --json "\"22h\""'
 
         Write-Host "Configuring Discovery Settings..."
         # Configure MDNS
@@ -64,14 +64,6 @@ resource "null_resource" "configure_ipfs" {
           --container-name ipfs `
           --exec-command 'ipfs config Discovery.MDNS.Enabled --json true'
 
-        Write-Host "Configuring Announce Settings..."
-        # Configure Addresses.Announce
-        az container exec `
-        --resource-group ${local.azurerm_rg_name} `
-        --name ${var.container_name} `
-        --container-name ipfs `
-        --exec-command 'ipfs config Addresses.Announce --json ["\"\/ip4\/${local.public_ip}\/tcp\/4001\"","\"\/ip4\/${local.public_ip}\/tcp\/443/https\"","\"\/ip4\/${local.public_ip}\/tcp\/4001\/ws\""]'
-
         Write-Host "Configuring AutoRelay Settings..."
         # Configure Swarm.EnableAutoRelay
         az container exec `
@@ -79,13 +71,6 @@ resource "null_resource" "configure_ipfs" {
         --name ${var.container_name} `
         --container-name ipfs `
         --exec-command 'ipfs config Swarm.EnableAutoRelay --json true'
-
-        Write-Host "Apply announce-on profile..."
-        az container exec `
-          --resource-group ${local.azurerm_rg_name} `
-          --name ${var.container_name} `
-          --container-name ipfs `
-          --exec-command 'ipfs config profile apply announce-on'
 
         Write-Host "Enable Experimental features for better content routing..."
         az container exec `
@@ -114,19 +99,6 @@ resource "null_resource" "configure_ipfs" {
           --container-name ipfs `
           --exec-command 'ipfs config --json Swarm.RelayClient.Enabled true'
         
-        Write-Host "Increase the number of high peers..."
-        az container exec `
-          --resource-group ${local.azurerm_rg_name} `
-          --name ${var.container_name} `
-          --container-name ipfs `
-          --exec-command 'ipfs config --json Swarm.ConnMgr.HighWater 300'
-
-        Write-Host "Increase the number of low peers..."
-        az container exec `
-          --resource-group ${local.azurerm_rg_name} `
-          --name ${var.container_name} `
-          --container-name ipfs `
-          --exec-command 'ipfs config --json Swarm.ConnMgr.LowWater 100'
         
         Write-Host "Increase the number of Grace Period..."
         az container exec `
@@ -163,14 +135,6 @@ resource "null_resource" "configure_ipfs" {
           --container-name ipfs `
           --exec-command 'ipfs config --json Swarm.Transports.Network.Relay true'
       
-        Write-Host "Configure specific relay servers to use..."
-        az container exec `
-          --resource-group ${local.azurerm_rg_name} `
-          --name ${var.container_name} `
-          --container-name ipfs `
-          --exec-command 'ipfs config --json Swarm.RelayClient.StaticRelays [\"/dns4/relay.ipfs.io/tcp/4001/p2p/QmQvM2mpqkjyXWbTHSUidUAWN26GgdMphTh9iGDdjgVXCy\",\"/dns4/relay.dev.ipfs.io/tcp/4001/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN\"]'
-          
-
         Write-Host "Configuration completed"
 
         Write-Host "Restarting IPFS container..."

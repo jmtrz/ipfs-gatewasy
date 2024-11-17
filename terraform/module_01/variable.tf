@@ -20,8 +20,16 @@ variable "container_name" {
   default = "hqipfsaci"
 }
 
+variable "hqipfs_gateway_auth_container_name" {
+  default = "hqipfsgatewayauthaci"
+}
+
 variable "dns_name_label" {
   default = "hqipfs-gateway"
+}
+
+variable "hqipfsgateway_dns_name_label" {
+  default = "hqipfs-gateway-auth"
 }
 
 variable "existing_registry_name" {
@@ -42,13 +50,13 @@ variable "use_existing_rg" {
 
 variable "use_existing_acg" {
   description = "enable users to use existing container group"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "admin_email" {
   description = "value"
-  default = "jamester@homeqube.com"
+  default     = "jamester@homeqube.com"
 }
 
 #-----------------------------
